@@ -220,7 +220,7 @@ export default function AboutPage() {
 
           {/* H1 */}
           <h1 style={{ fontSize: isMobile ? "38px" : isTablet ? "58px" : "clamp(60px,7.5vw,96px)", fontWeight: 800, color: "#0a1628", lineHeight: 1.0, letterSpacing: isMobile ? "-2px" : "-4px", margin: "0 auto 18px", maxWidth: "860px" }}>
-            A place to move<br />your <span style={{ color: "#ff8c00" }}>cargo</span> with precision.
+            A place to move<br />your <span style={{ color: "#5b3a8e" }}>cargo</span> with precision.
           </h1>
 
           {/* Short description */}
@@ -509,7 +509,7 @@ export default function AboutPage() {
             <div style={{ width: "28px", height: "2px", background: "#0369a1", borderRadius: "2px" }} />
           </div>
           <h2 style={{ fontSize: isMobile ? "30px" : "clamp(32px,4vw,52px)", fontWeight: 800, color: "#0a1628", margin: "0 0 12px", letterSpacing: "-2px", lineHeight: 1.05 }}>
-            35 years of <span style={{ color: "#ff8c00" }}>growth.</span>
+            35 years of <span style={{ color: "#5b3a8e" }}>growth.</span>
           </h2>
           <p style={{ fontSize: "15px", color: "#6b7280", maxWidth: "360px", margin: "0 auto", lineHeight: 1.6 }}>
             From a single Mombasa office to East Africa's leading logistics group.

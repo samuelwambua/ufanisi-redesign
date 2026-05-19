@@ -48,14 +48,17 @@ const STRING_Y   = 16;
 const PIN_HEAD_R = 8;
 const PIN_NEEDLE_H = 14;
 
-// ─── Gallery dimensions locked per breakpoint ───────────────────────────────
-// We derive these once from the INITIAL window width so mobile browser
-// chrome show/hide (which changes innerHeight and can fire resize) never
-// causes the gallery to jump between mobile and desktop sizes mid-scroll.
-function getBreakpoint(w: number) {
+function getBreakpoint(w: number): "mobile" | "tablet" | "desktop" {
   if (w < 768)  return "mobile";
   if (w < 1024) return "tablet";
   return "desktop";
+}
+
+// ─── Key fix: use visualViewport.width which does NOT change when the
+//     mobile browser toolbar shows/hides. Falls back to innerWidth.
+function getStableWidth(): number {
+  if (typeof window === "undefined") return 1440;
+  return Math.floor(window.visualViewport?.width ?? window.innerWidth);
 }
 
 function getArcY(screenX: number, vpWidth: number): number {
@@ -65,15 +68,13 @@ function getArcY(screenX: number, vpWidth: number): number {
 }
 
 export default function HeroSection() {
-  const [scrollX, setScrollX]     = useState(0);
-  const [vpWidth, setVpWidth]     = useState(1440);
+  const [scrollX, setScrollX]       = useState(0);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  // ── Breakpoint: derived from width only, not height ──────────────────────
-  // Using a ref + state pair so the gallery card sizes never flip during
-  // mobile scroll (when the browser address bar hides and fires resize).
-  const [bp, setBp] = useState<"mobile"|"tablet"|"desktop">(() =>
-    typeof window !== "undefined" ? getBreakpoint(window.innerWidth) : "desktop"
+  // ── Initialize from the real viewport width immediately (not hardcoded 1440)
+  const [vpWidth, setVpWidth] = useState<number>(() => getStableWidth());
+  const [bp, setBp]           = useState<"mobile" | "tablet" | "desktop">(() =>
+    getBreakpoint(getStableWidth())
   );
 
   const isMobile = bp === "mobile";
@@ -86,15 +87,14 @@ export default function HeroSection() {
   const velRef          = useRef(0);
   const lastX           = useRef(0);
   const lastT           = useRef(0);
-  // Track the last WIDTH so we only update breakpoint on width changes
-  const lastWidth       = useRef(typeof window !== "undefined" ? window.innerWidth : 1440);
+  // Track last WIDTH so we only update breakpoint on true width changes
+  const lastWidth       = useRef<number>(getStableWidth());
 
   useEffect(() => {
     const update = () => {
-      const w = window.innerWidth;
-      // Only update vpWidth & breakpoint when WIDTH actually changes.
-      // This prevents the gallery from reflowing when the mobile browser
-      // address bar appears/disappears (which only changes innerHeight).
+      // getStableWidth() uses visualViewport — immune to toolbar show/hide.
+      // Math.floor prevents sub-pixel jitter on some Android browsers.
+      const w = getStableWidth();
       if (w !== lastWidth.current) {
         lastWidth.current = w;
         setVpWidth(w);
@@ -102,13 +102,21 @@ export default function HeroSection() {
       }
     };
 
-    // Set correct initial values
-    setVpWidth(window.innerWidth);
-    setBp(getBreakpoint(window.innerWidth));
-    lastWidth.current = window.innerWidth;
+    // Sync initial values (in case SSR or stale initial state)
+    const w = getStableWidth();
+    if (w !== lastWidth.current) {
+      lastWidth.current = w;
+      setVpWidth(w);
+      setBp(getBreakpoint(w));
+    }
 
-    window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
+    // ── Critical: listen on visualViewport, not window ──
+    // visualViewport.resize fires on zoom/orientation changes but NOT when
+    // the mobile browser address bar appears/disappears. This is exactly
+    // what we want — layout stays stable during scroll.
+    const target: EventTarget = window.visualViewport ?? window;
+    target.addEventListener("resize", update);
+    return () => target.removeEventListener("resize", update);
   }, []);
 
   useEffect(() => {
@@ -164,23 +172,17 @@ export default function HeroSection() {
   };
 
   const sets        = [-1, 0, 1];
-  const trackOffset = vpWidth / 2 - TOTAL * CARD_STEP / 2;
   const stringPath  = `M 0,${STRING_Y} Q ${vpWidth / 2},${STRING_Y + ARC_DEPTH} ${vpWidth},${STRING_Y}`;
 
-  // ── Responsive values ─────────────────────────────────────────────────────
+  // ── Responsive values — derived from stable bp state ──────────────────────
   const navPadding  = isMobile ? "0 16px"       : isTablet ? "0 40px"       : "0 96px";
   const heroPadding = isMobile ? "40px 16px 0"  : isTablet ? "56px 40px 0"  : "64px 96px 0";
   const certPadding = isMobile ? "32px 16px"    : isTablet ? "36px 40px"    : "40px 96px";
 
-  // ── Gallery card dimensions — FIXED per breakpoint ──
-  // cardW / cardStep are used in JS scroll math only — still read from bp.
-  // galleryH is intentionally REMOVED: the gallery container height is now
-  // driven purely by a CSS class (see <style> block below) so the mobile
-  // browser toolbar appearing / disappearing never causes a React re-render
-  // that resizes the gallery.
-  const cardW    = isMobile ? 200 : CARD_WIDTH;   // 200 / 260
-  const cardStep = isMobile ? 220 : CARD_STEP;    // 220 / 292
-  const imgH     = isMobile ? 130 : 170;          // image height inside card
+  // Card dimensions — fixed per breakpoint, only update on real width change
+  const cardW    = isMobile ? 200 : CARD_WIDTH;
+  const cardStep = isMobile ? 220 : CARD_STEP;
+  const imgH     = isMobile ? 130 : 170;
 
   return (
     <div style={{ background: "#ffffff", fontFamily: "'DM Sans','Inter',sans-serif", overflowX: "hidden" }}>
@@ -196,6 +198,19 @@ export default function HeroSection() {
         @media (max-width: 767px) {
           .uf-gallery { height: 320px; }
         }
+
+        /* ── Hero text — locked font sizes via CSS, not JS ── */
+        .uf-hero-h1 {
+          font-size: clamp(60px, 7.5vw, 96px);
+          letter-spacing: -3px;
+        }
+        @media (max-width: 1023px) {
+          .uf-hero-h1 { font-size: 58px; letter-spacing: -2px; }
+        }
+        @media (max-width: 767px) {
+          .uf-hero-h1 { font-size: 38px; letter-spacing: -1.5px; }
+        }
+
         @keyframes certScroll {
           0%   { transform: translateX(0); }
           100% { transform: translateX(-50%); }
@@ -281,27 +296,34 @@ export default function HeroSection() {
         {/* Badge */}
         <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "#fff", border: "1.5px solid rgba(10,22,40,0.1)", borderRadius: "100px", padding: "5px 16px 5px 7px", marginBottom: "24px", boxShadow: "3px 3px 8px rgba(10,22,40,0.07),-2px -2px 6px rgba(255,255,255,1)" }}>
           <span style={{ background: "#0a1628", color: "#fff", fontSize: "10px", fontWeight: 700, padding: "3px 10px", borderRadius: "100px", letterSpacing: ".6px" }}>
-            <span style={{ color: "#ff8c00" }}>35</span>+ YEARS
+            <span style={{ color: "#fff" }}>35</span>+ YEARS
           </span>
           <span style={{ color: "#4a5568", fontSize: isMobile ? "11px" : "13px", fontWeight: 500 }}>East Africa's trusted freight partner</span>
         </div>
 
-        {/* ── H1 — matches About page sizing exactly ── */}
-        <h1 style={{
-          fontSize: isMobile ? "38px" : isTablet ? "58px" : "clamp(60px,7.5vw,96px)",
-          fontWeight: 800,
-          lineHeight: 1.05,
-          letterSpacing: isMobile ? "-1.5px" : "-3px",
-          color: "#0a1628",
-          maxWidth: "740px",
-          margin: "0 0 16px",
-        }}>
-          World-Class Logistics<br />For Africa <span style={{ color: "#5b3a8e" }}>&amp; Beyond.</span>
+        {/*
+          ── H1: font-size is set via .uf-hero-h1 CSS class (pure media queries).
+          This means the browser never re-evaluates it on toolbar show/hide —
+          only on true viewport width changes. The inline style is removed
+          to prevent JS-driven re-renders from overriding the CSS.
+        ──*/}
+        <h1
+          className="uf-hero-h1"
+          style={{
+            fontWeight: 800,
+            lineHeight: 1.05,
+            color: "#0a1628",
+            maxWidth: "1160px",
+            margin: "0 0 16px",
+            fontFamily: "'DM Sans','Inter',sans-serif",
+          }}
+        >
+          World-Class Logistics<br />For Africa <span style={{ color: "#5b3a8e" }}>&amp; <br />Beyond.</span>
         </h1>
 
         {/* Subtitle */}
         <p style={{ fontSize: "16px", color: "#6b7280", maxWidth: "480px", lineHeight: 1.6, margin: "0 0 32px", fontWeight: 400, padding: isMobile ? "0 8px" : "0" }}>
-          By land, air &amp; sea — moving your cargo across East &amp; Central Africa with speed and precision.
+           Moving your cargo across the globe with speed and precision.
         </p>
 
         {/* CTA */}
@@ -338,7 +360,6 @@ export default function HeroSection() {
 
           {sets.flatMap(set =>
             SERVICE_CARDS.map((card, i) => {
-              // Use stable cardW / cardStep — derived from bp not live isMobile
               const tOffset   = vpWidth / 2 - TOTAL * cardStep / 2;
               const rawCenter = set * TOTAL * cardStep + i * cardStep + cardW / 2;
               const screenX   = rawCenter - scrollX + tOffset;

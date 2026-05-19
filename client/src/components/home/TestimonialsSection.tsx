@@ -24,11 +24,9 @@ const CY = CANVAS_H / 2;
 const R_INNER = 160;
 const R_OUTER = 270;
 
-// Comet tail arc length in radians
 const TAIL_ARC = 0.55;
-// Speed: radians per second
-const SPEED_INNER = 0.6;  // anticlockwise (negative)
-const SPEED_OUTER = 0.45; // clockwise (positive)
+const SPEED_INNER = 0.6;
+const SPEED_OUTER = 0.45;
 
 function ringPositions(count: number, radius: number, offsetAngle = 0) {
   return Array.from({ length: count }, (_, i) => {
@@ -37,41 +35,24 @@ function ringPositions(count: number, radius: number, offsetAngle = 0) {
   });
 }
 
-// Get the color of the avatar closest behind the comet head on a given ring
-function getCometColor(
-  headAngle: number,
-  direction: 1 | -1,
-  avatarAngles: { angle: number; color: string }[]
-): string {
-  // Normalize all angles to [0, 2PI)
+function getCometColor(headAngle: number, direction: 1 | -1, avatarAngles: { angle: number; color: string }[]): string {
   const normalize = (a: number) => ((a % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
   const head = normalize(headAngle);
-
-  // Find avatar whose angle is "just behind" the head in travel direction
   let bestColor = "#0a1628";
   let bestDist = Infinity;
-
   for (const av of avatarAngles) {
     const avN = normalize(av.angle);
-    // Distance behind head in travel direction
     let dist: number;
     if (direction === 1) {
-      // Clockwise: head travels increasing angle
-      // "behind" means avN <= head (mod 2PI)
       dist = head >= avN ? head - avN : head + 2 * Math.PI - avN;
     } else {
-      // Anticlockwise: head travels decreasing angle
       dist = avN >= head ? avN - head : avN + 2 * Math.PI - head;
     }
-    if (dist < bestDist) {
-      bestDist = dist;
-      bestColor = av.color;
-    }
+    if (dist < bestDist) { bestDist = dist; bestColor = av.color; }
   }
   return bestColor;
 }
 
-// Build SVG path for a comet streak arc on a circle
 function cometPath(cx: number, cy: number, r: number, headAngle: number, tailArc: number, direction: 1 | -1) {
   const tailAngle = headAngle - direction * tailArc;
   const hx = cx + r * Math.cos(headAngle);
@@ -169,20 +150,16 @@ export default function TestimonialsSection() {
     return () => window.removeEventListener("resize", update);
   }, []);
 
-  // Responsive ring/canvas sizes
   const canvasW = isMobile ? 360 : isTablet ? 520 : CANVAS_W;
   const canvasH = isMobile ? 360 : isTablet ? 460 : CANVAS_H;
   const cx = canvasW / 2;
   const cy = canvasH / 2;
   const rInner = isMobile ? 90 : isTablet ? 130 : R_INNER;
   const rOuter = isMobile ? 155 : isTablet ? 220 : R_OUTER;
-  const avatarSizeInner = isMobile ? 40 : 62;
-  const avatarSizeOuter = isMobile ? 36 : 56;
 
   const innerPos = ringPositions(INNER.length, rInner, 0).map(p => ({ ...p, x: cx + rInner * Math.cos(p.angle - Math.PI / 2 + Math.PI / 2), y: cy + rInner * Math.sin(p.angle - Math.PI / 2 + Math.PI / 2) }));
   const outerPos = ringPositions(OUTER.length, rOuter, Math.PI / OUTER.length).map(p => ({ ...p, x: cx + rOuter * Math.cos(p.angle - Math.PI / 2 + Math.PI / 2 + Math.PI / OUTER.length), y: cy + rOuter * Math.sin(p.angle - Math.PI / 2 + Math.PI / 2 + Math.PI / OUTER.length) }));
 
-  // Intersection Observer
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => setIsVisible(entry.isIntersecting),
@@ -192,7 +169,6 @@ export default function TestimonialsSection() {
     return () => observer.disconnect();
   }, []);
 
-  // Animation loop
   const animate = useCallback((time: number) => {
     if (lastTimeRef.current === 0) lastTimeRef.current = time;
     const delta = (time - lastTimeRef.current) / 1000;
@@ -229,18 +205,46 @@ export default function TestimonialsSection() {
   };
 
   return (
-    <section ref={sectionRef} style={{ background: "#ffffff", minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: isMobile ? "48px 16px" : isTablet ? "60px 40px" : "60px 96px", position: "relative", overflow: "hidden" }}>
-
+    <section
+      ref={sectionRef}
+      style={{
+        background: "#ffffff",
+        minHeight: isMobile ? "auto" : "100vh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: isMobile ? "32px 16px 36px" : isTablet ? "60px 40px" : "60px 96px",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
       {/* Ambient blobs */}
       <div style={{ position: "absolute", top: "-100px", right: "-100px", width: "500px", height: "500px", background: "radial-gradient(circle,rgba(91,58,142,0.05) 0%,transparent 70%)", borderRadius: "50%", pointerEvents: "none" }} />
       <div style={{ position: "absolute", bottom: "-100px", left: "-100px", width: "450px", height: "450px", background: "radial-gradient(circle,rgba(3,105,161,0.05) 0%,transparent 70%)", borderRadius: "50%", pointerEvents: "none" }} />
 
-      {/* H2 + subheading */}
-      <div style={{ marginBottom: "32px", zIndex: 10, textAlign: "center" }}>
-        <h2 style={{ fontSize: isMobile ? "24px" : "clamp(28px,3.5vw,42px)", fontWeight: 800, color: "#0a1628", margin: "0 0 10px", letterSpacing: "-1px", lineHeight: 1.1 }}>
+      {/* Header: badge → H2 → hint */}
+      <div style={{ marginBottom: isMobile ? "16px" : "32px", zIndex: 10, textAlign: "center" }}>
+        <div style={{
+          display: "inline-flex", alignItems: "center", gap: "8px",
+          background: "rgba(91,58,142,0.07)", border: "1px solid rgba(91,58,142,0.15)",
+          borderRadius: "100px", padding: "5px 16px", marginBottom: "12px",
+        }}>
+          <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#5b3a8e" }} />
+          <span style={{ fontSize: "11px", fontWeight: 600, color: "#5b3a8e", letterSpacing: "0.8px", textTransform: "uppercase", fontFamily: "'DM Sans',sans-serif" }}>
+            Client Voices
+          </span>
+        </div>
+
+        <h2 style={{
+          fontSize: isMobile ? "24px" : "clamp(28px,3.5vw,42px)",
+          fontWeight: 800, color: "#0a1628",
+          margin: "0 0 8px", letterSpacing: "-1px", lineHeight: 1.1, display: "block",
+        }}>
           What Our Clients Say
         </h2>
-        <p style={{ fontSize: "15px", color: "#6b7280", margin: 0, lineHeight: 1.5 }}>
+
+        <p style={{ fontSize: isMobile ? "13px" : "15px", color: "#6b7280", margin: 0, lineHeight: 1.5 }}>
           Hover a face to preview · click to read in full
         </p>
       </div>
@@ -248,8 +252,6 @@ export default function TestimonialsSection() {
       {/* Circle canvas */}
       <div style={{ position: "relative", width: `${canvasW}px`, height: `${canvasH}px`, maxWidth: "100%" }}>
         <svg width={canvasW} height={canvasH} style={{ position: "absolute", top: 0, left: 0, overflow: "visible" }}>
-
-          {/* SVG defs for comet gradients */}
           <defs>
             <linearGradient id="innerGrad" gradientUnits="userSpaceOnUse"
               x1={cx + rInner * Math.cos(innerAngle - (-1) * TAIL_ARC)}
@@ -275,11 +277,9 @@ export default function TestimonialsSection() {
             </filter>
           </defs>
 
-          {/* Base rings */}
           <circle cx={cx} cy={cy} r={rOuter} fill="none" stroke="rgba(10,22,40,0.07)" strokeWidth="1.5" strokeDasharray="7 5" />
           <circle cx={cx} cy={cy} r={rInner} fill="none" stroke="rgba(10,22,40,0.07)" strokeWidth="1.5" strokeDasharray="5 4" />
 
-          {/* INNER comet */}
           {isVisible && (
             <g filter="url(#glowInner)">
               <path d={cometPath(cx, cy, rInner, innerAngle, TAIL_ARC, -1)} fill="none" stroke="url(#innerGrad)" strokeWidth="2.5" strokeLinecap="round" />
@@ -288,7 +288,6 @@ export default function TestimonialsSection() {
             </g>
           )}
 
-          {/* OUTER comet */}
           {isVisible && (
             <g filter="url(#glowOuter)">
               <path d={cometPath(cx, cy, rOuter, outerAngle, TAIL_ARC, 1)} fill="none" stroke="url(#outerGrad)" strokeWidth="3" strokeLinecap="round" />
@@ -297,22 +296,25 @@ export default function TestimonialsSection() {
             </g>
           )}
 
-          {/* Outer avatars */}
           {OUTER.map((t, i) => (
             <Avatar key={t.id} t={t} x={outerPos[i].x} y={outerPos[i].y} size={56} onClick={handleClick} />
           ))}
-
-          {/* Inner avatars */}
           {INNER.map((t, i) => (
             <Avatar key={t.id} t={t} x={innerPos[i].x} y={innerPos[i].y} size={62} onClick={handleClick} />
           ))}
         </svg>
 
-        {/* Center badge */}
+        {/* Centre disc */}
         <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)", zIndex: 10 }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", background: "rgba(91,58,142,0.07)", border: "1px solid rgba(91,58,142,0.15)", borderRadius: "100px", padding: "6px 18px" }}>
-            <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#5b3a8e" }} />
-            <span style={{ fontSize: "11px", fontWeight: 600, color: "#5b3a8e", letterSpacing: "0.8px", textTransform: "uppercase", fontFamily: "'DM Sans',sans-serif" }}>Client Voices</span>
+          <div style={{
+            width: "56px", height: "56px", borderRadius: "50%",
+            background: "linear-gradient(135deg,#5b3a8e,#7c3aed)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            boxShadow: "0 4px 20px rgba(91,58,142,0.35)",
+          }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
           </div>
         </div>
       </div>
