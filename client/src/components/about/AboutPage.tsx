@@ -1,12 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import {
-  X, Search, ChevronRight, Truck, MapPin, ShieldCheck, Globe,
-  Calendar, Map, Users, BadgeCheck,
+  ChevronRight, Truck, MapPin, ShieldCheck, Globe,
+  Calendar, Users, BadgeCheck,
   Anchor, Globe2, Shield, CheckCircle2, Award, Trophy,
   Zap, CheckCircle, Lock, Earth, Star,
   Check, ShieldAlert, ArrowRight,
 } from "lucide-react";
-import logo from "../../assets/ufanisi-logo.png";
 import Footer from "../Footer";
 
 import imgSeaFreight  from "../../assets/sea-freight.jfif";
@@ -16,14 +15,6 @@ import imgWarehousing from "../../assets/warehousing.jfif";
 import imgTrucking    from "../../assets/trucking.jfif";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
-const NAV_LINKS = [
-  { label: "About",    href: "/about"    },
-  { label: "Services", href: "/services" },
-  { label: "SDGs",     href: "/sdgs"     },
-  { label: "Blogs",    href: "/blogs"    },
-  { label: "Contact",  href: "/contact"  },
-];
-
 const CARDS = [
   { title: "Sea Freight",       subtitle: "Ocean Shipping",  image: imgSeaFreight,  color: "#0369a1", rotate: -18, zIndex: 1, delay: "0ms"   },
   { title: "Air Freight",       subtitle: "Express Cargo",   image: imgAirFreight,  color: "#5b3a8e", rotate: -9,  zIndex: 2, delay: "60ms"  },
@@ -39,11 +30,6 @@ const PILLS = [
   { label: "ISO Certified", sub: "9001 · 22000",   side: "right", top: "60%", color: "#0a6e3f", Icon: BadgeCheck },
 ];
 
-// Road path: vertical snake through 200×700 viewBox
-// Milestone cx values determine which side cards appear:
-//   cx < 100  → road curves LEFT  → text card on RIGHT
-//   cx > 100  → road curves RIGHT → text card on LEFT
-//   cx === 100 → centre (top/bottom) → card on LEFT
 const ROAD_PATH =
   "M 100,0 C 100,40 100,45 100,70 " +
   "C 100,115 52,145 52,180 " +
@@ -54,21 +40,21 @@ const ROAD_PATH =
   "C 100,662 100,688 100,700";
 
 const TIMELINE = [
-  { year: "1989", title: "Founded",       stat: "Est. 1989",   desc: "Incorporated in Mombasa as a wholly Kenyan-owned freight & clearing company.", Icon: Anchor,      color: "#ff8c00", cx: 100 },
-  { year: "1995", title: "Regional Growth",stat: "5 Offices",  desc: "Opened in Nairobi; cross-border presence at Malaba, Namanga & Holili.",        Icon: Globe2,      color: "#0369a1", cx: 52  },
-  { year: "2005", title: "ISO 9001",      stat: "Certified",   desc: "Quality management certification — raising the bar for East African logistics.", Icon: Shield,      color: "#5b3a8e", cx: 148 },
-  { year: "2012", title: "ISO 22000",     stat: "Food Safety", desc: "Added food safety cert for cold-chain and perishable cargo handling.",           Icon: CheckCircle2,color: "#0a6e3f", cx: 52  },
-  { year: "2018", title: "AEO Status",    stat: "EAC AEO",     desc: "Authorized Economic Operator — priority customs clearance across the EAC.",      Icon: Award,       color: "#be123c", cx: 148 },
-  { year: "2023", title: "Kenya Top 100", stat: "Top 100",     desc: "Recognized among Kenya's Top 100 Mid-Sized Companies for sustained excellence.", Icon: Trophy,      color: "#b45309", cx: 100 },
+  { year: "1989", title: "Founded",        stat: "Est. 1989",   desc: "Incorporated in Mombasa as a wholly Kenyan-owned freight & clearing company.", Icon: Anchor,       color: "#ff8c00", cx: 100 },
+  { year: "1995", title: "Regional Growth", stat: "5 Offices",  desc: "Opened in Nairobi; cross-border presence at Malaba, Namanga & Holili.",        Icon: Globe2,       color: "#0369a1", cx: 52  },
+  { year: "2005", title: "ISO 9001",        stat: "Certified",   desc: "Quality management certification — raising the bar for East African logistics.", Icon: Shield,       color: "#5b3a8e", cx: 148 },
+  { year: "2012", title: "ISO 22000",       stat: "Food Safety", desc: "Added food safety cert for cold-chain and perishable cargo handling.",           Icon: CheckCircle2, color: "#0a6e3f", cx: 52  },
+  { year: "2018", title: "AEO Status",      stat: "EAC AEO",     desc: "Authorized Economic Operator — priority customs clearance across the EAC.",      Icon: Award,        color: "#be123c", cx: 148 },
+  { year: "2023", title: "Kenya Top 100",   stat: "Top 100",     desc: "Recognized among Kenya's Top 100 Mid-Sized Companies for sustained excellence.", Icon: Trophy,       color: "#b45309", cx: 100 },
 ];
 
 const CORE_VALUES = [
-  { Icon: Zap,          title: "Speed",         color: "#0369a1", bg: "rgba(3,105,161,0.08)",  desc: "Systems audited continuously to eliminate delays at every checkpoint." },
-  { Icon: CheckCircle,  title: "Accuracy",      color: "#0a6e3f", bg: "rgba(10,110,63,0.08)", desc: "Error-free billing and proactive communication on every cargo movement." },
-  { Icon: Lock,         title: "Safety",        color: "#be123c", bg: "rgba(190,18,60,0.08)", desc: "GPS-monitored fleet and ISO-certified warehousing for zero-risk delivery." },
-  { Icon: Earth,        title: "Coverage",      color: "#5b3a8e", bg: "rgba(91,58,142,0.08)", desc: "8 countries, all major ports, airports and border crossings in East Africa." },
-  { Icon: Users,        title: "Customer Focus",color: "#b45309", bg: "rgba(180,83,9,0.08)",  desc: "We place the highest priority on understanding and exceeding client expectations." },
-  { Icon: Star,         title: "Competence",    color: "#ff8c00", bg: "rgba(255,140,0,0.08)", desc: "Careful recruitment, training and performance management keep our team world-class." },
+  { Icon: Zap,         title: "Speed",         color: "#0369a1", bg: "rgba(3,105,161,0.08)",  desc: "Systems audited continuously to eliminate delays at every checkpoint." },
+  { Icon: CheckCircle, title: "Accuracy",      color: "#0a6e3f", bg: "rgba(10,110,63,0.08)", desc: "Error-free billing and proactive communication on every cargo movement." },
+  { Icon: Lock,        title: "Safety",        color: "#be123c", bg: "rgba(190,18,60,0.08)", desc: "GPS-monitored fleet and ISO-certified warehousing for zero-risk delivery." },
+  { Icon: Earth,       title: "Coverage",      color: "#5b3a8e", bg: "rgba(91,58,142,0.08)", desc: "8 countries, all major ports, airports and border crossings in East Africa." },
+  { Icon: Users,       title: "Customer Focus",color: "#b45309", bg: "rgba(180,83,9,0.08)",  desc: "We place the highest priority on understanding and exceeding client expectations." },
+  { Icon: Star,        title: "Competence",    color: "#ff8c00", bg: "rgba(255,140,0,0.08)", desc: "Careful recruitment, training and performance management keep our team world-class." },
 ];
 
 const COMMITMENTS = [
@@ -113,12 +99,11 @@ function CountStat({ value, label, sub, run }: { value: string; label: string; s
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export default function AboutPage() {
-  const [isMobile, setIsMobile]     = useState(false);
-  const [isTablet, setIsTablet]     = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [mounted, setMounted]       = useState(false);
-  const [statsRun, setStatsRun]     = useState(false);
-  const [hovered, setHovered]       = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
+  const [mounted, setMounted]   = useState(false);
+  const [statsRun, setStatsRun] = useState(false);
+  const [hovered, setHovered]   = useState<string | null>(null);
   const statsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -128,8 +113,6 @@ export default function AboutPage() {
     const t = setTimeout(() => setMounted(true), 80);
     return () => { window.removeEventListener("resize", u); clearTimeout(t); };
   }, []);
-
-  useEffect(() => { if (!isMobile && !isTablet) setDrawerOpen(false); }, [isMobile, isTablet]);
 
   useEffect(() => {
     const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) setStatsRun(true); }, { threshold: 0.2 });
@@ -150,56 +133,6 @@ export default function AboutPage() {
         @keyframes pillLeft  { from { opacity:0; transform:translateX(-20px); } to { opacity:1; transform:translateX(0); } }
         @keyframes pillRight { from { opacity:0; transform:translateX(20px);  } to { opacity:1; transform:translateX(0); } }
       `}</style>
-
-      {/* Drawer overlay */}
-      {drawerOpen && <div onClick={() => setDrawerOpen(false)} style={{ position: "fixed", inset: 0, background: "rgba(10,22,40,0.35)", zIndex: 200, backdropFilter: "blur(4px)" }} />}
-
-      {/* Side Drawer */}
-      <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: "280px", background: "#fff", zIndex: 300, transform: drawerOpen ? "translateX(0)" : "translateX(100%)", transition: "transform .35s cubic-bezier(.4,0,.2,1)", boxShadow: drawerOpen ? "-8px 0 32px rgba(10,22,40,0.12)" : "none", display: "flex", flexDirection: "column", padding: "24px" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "40px" }}>
-          <img src={logo} alt="Ufanisi" style={{ height: "48px", objectFit: "contain" }} />
-          <button onClick={() => setDrawerOpen(false)} style={{ background: "rgba(10,22,40,0.06)", border: "none", borderRadius: "10px", width: "36px", height: "36px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <X size={18} color="#0a1628" strokeWidth={2.2} />
-          </button>
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 1 }}>
-          {NAV_LINKS.map(l => (
-            <a key={l.label} href={l.href} onClick={() => setDrawerOpen(false)} style={{ color: "#0a1628", fontSize: "16px", fontWeight: 600, textDecoration: "none", padding: "14px 16px", borderRadius: "12px", transition: "background .2s" }}
-              onMouseEnter={e => (e.currentTarget.style.background = "rgba(10,22,40,0.05)")}
-              onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
-            >{l.label}</a>
-          ))}
-        </div>
-        <button style={{ background: "#0a1628", color: "#fff", border: "none", padding: "14px", borderRadius: "100px", fontSize: "15px", fontWeight: 600, cursor: "pointer", fontFamily: "inherit", width: "100%" }}>Get a Quote</button>
-      </div>
-
-      {/* ════ NAVBAR ════ */}
-      <nav style={{ position: "sticky", top: 0, zIndex: 100, display: "flex", alignItems: "center", justifyContent: "space-between", padding: hp, height: "70px", background: "rgba(255,255,255,0.94)", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(10,22,40,0.07)" }}>
-        <a href="/"><img src={logo} alt="Ufanisi" style={{ height: "60px", objectFit: "contain" }} /></a>
-        {!isMobile && !isTablet && (
-          <>
-            <div style={{ display: "flex", gap: "34px" }}>
-              {NAV_LINKS.map(l => (
-                <a key={l.label} href={l.href} style={{ color: l.href === "/about" ? "#0a1628" : "#6b7280", fontSize: "14px", fontWeight: l.href === "/about" ? 700 : 500, textDecoration: "none", borderBottom: l.href === "/about" ? "2px solid #ff8c00" : "2px solid transparent", paddingBottom: "2px", transition: "color .2s" }}
-                  onMouseEnter={e => (e.currentTarget.style.color = "#0a1628")}
-                  onMouseLeave={e => (e.currentTarget.style.color = l.href === "/about" ? "#0a1628" : "#6b7280")}
-                >{l.label}</a>
-              ))}
-            </div>
-            <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
-              <a href="/tracking" style={{ fontSize: "14px", fontWeight: 500, color: "#0a1628", textDecoration: "none", display: "flex", alignItems: "center", gap: "5px" }}>
-                <Search size={14} color="#ff8c00" strokeWidth={2.2} />Track Cargo
-              </a>
-              <button style={{ background: "#0a1628", color: "#fff", border: "none", padding: "10px 24px", borderRadius: "100px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 4px 14px rgba(10,22,40,0.22)" }}>Get a Quote</button>
-            </div>
-          </>
-        )}
-        {(isMobile || isTablet) && (
-          <button onClick={() => setDrawerOpen(true)} style={{ background: "rgba(10,22,40,0.06)", border: "none", borderRadius: "10px", width: "40px", height: "40px", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "5px", padding: "10px" }}>
-            {[0,1,2].map(i => <span key={i} style={{ display: "block", width: "18px", height: "2px", background: "#0a1628", borderRadius: "2px" }} />)}
-          </button>
-        )}
-      </nav>
 
       {/* ════════════════════════════════════════════════
           HERO
@@ -230,7 +163,7 @@ export default function AboutPage() {
         </div>
 
         {/* Fan cards + floating pills */}
-        <div style={{ position: "relative", width: "100%", height: isMobile ? "260px" : isTablet ? "340px" : "420px", marginTop: isMobile ? "32px" : "40px", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
+        <div style={{ position: "relative", width: "100%", height: isMobile ? "260px" : isTablet ? "340px" : "420px", marginTop: isMobile ? "8px" : "24px", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
 
           {/* Floating pills */}
           {!isMobile && PILLS.map((pill, i) => (
@@ -297,13 +230,12 @@ export default function AboutPage() {
       <section ref={statsRef} style={{ background: "#f0f2f5", padding: isMobile ? "56px 16px" : isTablet ? "64px 40px" : "80px 96px" }}>
         <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "360px 1fr", gap: "20px", alignItems: "start" }}>
 
-          {/* ── Dark bio card — with Vision & Mission added ── */}
+          {/* ── Dark bio card ── */}
           <div style={{ background: "linear-gradient(160deg,#0a1628 0%,#0d1f3c 70%,#1a2a5e 100%)", borderRadius: "24px", padding: "36px 28px", position: "relative", overflow: "hidden", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
             <div style={{ position: "absolute", top: "-60px", right: "-60px", width: "240px", height: "240px", background: "radial-gradient(circle,rgba(91,58,142,0.22) 0%,transparent 70%)", borderRadius: "50%" }} />
             <div style={{ position: "absolute", bottom: "-40px", left: "-40px", width: "180px", height: "180px", background: "radial-gradient(circle,rgba(255,140,0,0.1) 0%,transparent 70%)", borderRadius: "50%" }} />
 
             <div style={{ position: "relative", zIndex: 1 }}>
-              {/* Badge */}
               <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(255,140,0,0.15)", border: "1px solid rgba(255,140,0,0.3)", borderRadius: "100px", padding: "4px 12px", marginBottom: "20px" }}>
                 <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#ff8c00" }} />
                 <span style={{ fontSize: "11px", fontWeight: 600, color: "#ff8c00", letterSpacing: "0.6px" }}>WHO WE ARE</span>
@@ -314,7 +246,6 @@ export default function AboutPage() {
                 A wholly Kenyan-owned company incorporated in Mombasa in 1989. We've grown to become East and Central Africa's most trusted logistics provider — by sea, air, and land.
               </p>
 
-              {/* Quick-info rows */}
               <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "24px" }}>
                 {[
                   { Icon: MapPin,      text: "Mombasa HQ · Nairobi · Malaba · Holili · Namanga" },
@@ -328,10 +259,8 @@ export default function AboutPage() {
                 ))}
               </div>
 
-              {/* Divider */}
               <div style={{ height: "1px", background: "rgba(255,255,255,0.08)", margin: "0 0 20px" }} />
 
-              {/* Vision */}
               <div style={{ marginBottom: "14px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "7px", marginBottom: "7px" }}>
                   <div style={{ width: "3px", height: "14px", background: "#ff8c00", borderRadius: "2px", flexShrink: 0 }} />
@@ -342,7 +271,6 @@ export default function AboutPage() {
                 </p>
               </div>
 
-              {/* Mission */}
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: "7px", marginBottom: "7px" }}>
                   <div style={{ width: "3px", height: "14px", background: "#5b8fff", borderRadius: "2px", flexShrink: 0 }} />
@@ -363,14 +291,13 @@ export default function AboutPage() {
             </a>
           </div>
 
-          {/* ── 2×2 analytic-style stat cards (reference image style) ── */}
+          {/* ── 2×2 stat cards ── */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
             {[
               {
                 value: "35+",  label: "Years",        tag: "Est. 1989",
                 sub: "Serving East & Central Africa with world-class freight solutions.",
                 color: "#ff8c00", colorLight: "rgba(255,140,0,0.12)",
-                // Upward line chart
                 chart: (
                   <svg viewBox="0 0 120 52" style={{ width: "100%", height: "52px" }}>
                     <defs>
@@ -389,7 +316,6 @@ export default function AboutPage() {
                 value: "250+", label: "Employees",    tag: "EAC Region",
                 sub: "Dedicated professionals operating across 8 East African nations.",
                 color: "#0369a1", colorLight: "rgba(3,105,161,0.10)",
-                // Bar chart
                 chart: (
                   <svg viewBox="0 0 120 52" style={{ width: "100%", height: "52px" }}>
                     {[
@@ -406,12 +332,9 @@ export default function AboutPage() {
                 value: "8",    label: "Countries",    tag: "& Growing",
                 sub: "From Kenya to Zambia — covering the full East & Central Africa corridor.",
                 color: "#0a6e3f", colorLight: "rgba(10,110,63,0.10)",
-                // Donut chart
                 chart: (
                   <svg viewBox="0 0 120 52" style={{ width: "100%", height: "52px" }}>
-                    {/* Donut centred at 60,26 r=22 */}
                     <circle cx="60" cy="26" r="22" fill="none" stroke="rgba(10,110,63,0.15)" strokeWidth="10" />
-                    {/* 8/10 filled = 80% = 0.8 × 2π × 22 ≈ 110.5 of 138.2 circumference */}
                     <circle cx="60" cy="26" r="22" fill="none" stroke="#0a6e3f" strokeWidth="10"
                       strokeDasharray="110 138" strokeDashoffset="34.5" strokeLinecap="round"
                       style={{ transform: "rotate(-90deg)", transformOrigin: "60px 26px" }} />
@@ -423,7 +346,6 @@ export default function AboutPage() {
                 value: "99%",  label: "Satisfaction", tag: "All Time",
                 sub: "Consistent client feedback sustained across three decades of service.",
                 color: "#5b3a8e", colorLight: "rgba(91,58,142,0.10)",
-                // Wave/curve
                 chart: (
                   <svg viewBox="0 0 120 52" style={{ width: "100%", height: "52px" }}>
                     <defs>
@@ -445,45 +367,27 @@ export default function AboutPage() {
                 onMouseEnter={() => setHovered(`s-${stat.label}`)}
                 onMouseLeave={() => setHovered(null)}
                 style={{
-                  background: "#ffffff",
-                  borderRadius: "20px",
-                  padding: "22px 20px 18px",
+                  background: "#ffffff", borderRadius: "20px", padding: "22px 20px 18px",
                   border: "1px solid rgba(10,22,40,0.07)",
-                  boxShadow: hovered === `s-${stat.label}`
-                    ? `0 16px 40px rgba(10,22,40,0.10), 0 2px 8px ${stat.color}18`
-                    : "0 2px 12px rgba(10,22,40,0.05)",
+                  boxShadow: hovered === `s-${stat.label}` ? `0 16px 40px rgba(10,22,40,0.10), 0 2px 8px ${stat.color}18` : "0 2px 12px rgba(10,22,40,0.05)",
                   transition: "all .25s ease",
                   transform: hovered === `s-${stat.label}` ? "translateY(-4px)" : "translateY(0)",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "0",
+                  display: "flex", flexDirection: "column", gap: "0",
                 }}
               >
-                {/* Top row: label + tag */}
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
                   <span style={{ fontSize: "13px", fontWeight: 700, color: "#0a1628" }}>{stat.label}</span>
-                  <span style={{ fontSize: "10px", fontWeight: 600, color: stat.color, background: stat.colorLight, padding: "3px 8px", borderRadius: "100px", letterSpacing: "0.3px" }}>
-                    {stat.tag}
-                  </span>
+                  <span style={{ fontSize: "10px", fontWeight: 600, color: stat.color, background: stat.colorLight, padding: "3px 8px", borderRadius: "100px", letterSpacing: "0.3px" }}>{stat.tag}</span>
                 </div>
-
-                {/* Big metric */}
                 <div style={{ display: "flex", alignItems: "baseline", gap: "4px", marginBottom: "14px" }}>
                   <span style={{ fontSize: "clamp(32px,4vw,42px)", fontWeight: 800, color: "#0a1628", letterSpacing: "-2px", lineHeight: 1 }}>
                     {statsRun ? stat.value : "0"}
                   </span>
-                  {/* Upward arrow indicator */}
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ marginBottom: "6px" }}>
                     <path d="M7 17L17 7M17 7H7M17 7V17" stroke={stat.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>
-
-                {/* Chart */}
-                <div style={{ margin: "0 -4px 14px" }}>
-                  {stat.chart}
-                </div>
-
-                {/* Bottom: sub text + arrow */}
+                <div style={{ margin: "0 -4px 14px" }}>{stat.chart}</div>
                 <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: "8px" }}>
                   <p style={{ fontSize: "11px", color: "#9ca3af", lineHeight: 1.55, margin: 0, flex: 1 }}>{stat.sub}</p>
                   <div style={{ width: "28px", height: "28px", borderRadius: "50%", background: stat.colorLight, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -497,11 +401,9 @@ export default function AboutPage() {
       </section>
 
       {/* ════════════════════════════════════════════════
-          SECTION 3 — VERTICAL WINDING ROAD TIMELINE
+          SECTION 3 — TIMELINE
       ════════════════════════════════════════════════ */}
       <section style={{ background: "#f8f9fb", padding: isMobile ? "56px 16px" : isTablet ? "72px 40px" : "88px 96px" }}>
-
-        {/* Header */}
         <div style={{ textAlign: "center", marginBottom: isMobile ? "48px" : "64px" }}>
           <div style={{ display: "inline-flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
             <div style={{ width: "28px", height: "2px", background: "#0369a1", borderRadius: "2px" }} />
@@ -516,96 +418,50 @@ export default function AboutPage() {
           </p>
         </div>
 
-        {/* Desktop — 3-column grid: left cards | road SVG | right cards */}
         {!isMobile && (
           <div style={{ position: "relative", maxWidth: isTablet ? "760px" : "960px", margin: "0 auto" }}>
-
-            {/* Road SVG absolutely behind the grid */}
-            <div style={{
-              position: "absolute",
-              left: "50%",
-              transform: "translateX(-50%)",
-              top: 0,
-              width: isTablet ? "160px" : "200px",
-              // height must match the grid — 6 rows × rowHeight
-              height: "100%",
-              zIndex: 0,
-              pointerEvents: "none",
-            }}>
+            <div style={{ position: "absolute", left: "50%", transform: "translateX(-50%)", top: 0, width: isTablet ? "160px" : "200px", height: "100%", zIndex: 0, pointerEvents: "none" }}>
               <svg viewBox="0 0 200 700" preserveAspectRatio="xMidYMid meet" style={{ width: "100%", height: "100%" }}>
                 <defs>
                   <filter id="vShadow" x="-20%" y="-2%" width="140%" height="104%">
                     <feDropShadow dx="2" dy="0" stdDeviation="4" floodColor="#0a1628" floodOpacity="0.12" />
                   </filter>
                 </defs>
-                {/* Road shadow layer */}
                 <path d={ROAD_PATH} fill="none" stroke="#1a2535" strokeWidth="16" strokeLinecap="round" strokeLinejoin="round" filter="url(#vShadow)" />
-                {/* Road surface */}
                 <path d={ROAD_PATH} fill="none" stroke="#232f3e" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" />
-                {/* Centre dash */}
                 <path d={ROAD_PATH} fill="none" stroke="rgba(255,255,255,0.20)" strokeWidth="1.2" strokeLinecap="round" strokeDasharray="12 9" />
               </svg>
             </div>
-
-            {/* Timeline rows */}
             <div style={{ position: "relative", zIndex: 1 }}>
               {TIMELINE.map((m, i) => {
-                // cx < 100 → road swings left → icon appears left of centre → card on RIGHT
-                // cx >= 100 → road centre/right → card on LEFT
                 const cardLeft = m.cx >= 100;
-
                 return (
-                  <div key={m.year} style={{
-                    display: "grid",
-                    gridTemplateColumns: isTablet ? "1fr 160px 1fr" : "1fr 200px 1fr",
-                    alignItems: "center",
-                    minHeight: isTablet ? "112px" : "118px",
-                  }}>
-
-                    {/* LEFT card slot */}
+                  <div key={m.year} style={{ display: "grid", gridTemplateColumns: isTablet ? "1fr 160px 1fr" : "1fr 200px 1fr", alignItems: "center", minHeight: isTablet ? "112px" : "118px" }}>
                     <div style={{ paddingRight: isTablet ? "24px" : "36px", display: "flex", justifyContent: "flex-end" }}>
                       {cardLeft && (
-                        <div
-                          onMouseEnter={() => setHovered(m.year)}
-                          onMouseLeave={() => setHovered(null)}
-                          style={{ background: "#fff", borderRadius: "18px", padding: "18px 20px", border: hovered === m.year ? `1.5px solid ${m.color}35` : "1.5px solid rgba(10,22,40,0.07)", boxShadow: hovered === m.year ? `0 12px 32px rgba(10,22,40,0.10)` : "0 2px 10px rgba(10,22,40,0.05)", transition: "all .22s ease", maxWidth: "280px", width: "100%", cursor: "default" }}
-                        >
+                        <div onMouseEnter={() => setHovered(m.year)} onMouseLeave={() => setHovered(null)}
+                          style={{ background: "#fff", borderRadius: "18px", padding: "18px 20px", border: hovered === m.year ? `1.5px solid ${m.color}35` : "1.5px solid rgba(10,22,40,0.07)", boxShadow: hovered === m.year ? "0 12px 32px rgba(10,22,40,0.10)" : "0 2px 10px rgba(10,22,40,0.05)", transition: "all .22s ease", maxWidth: "280px", width: "100%", cursor: "default" }}>
                           <div style={{ fontSize: "10px", fontWeight: 700, color: m.color, textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "4px" }}>{m.year} · {m.stat}</div>
                           <div style={{ fontSize: "15px", fontWeight: 700, color: "#0a1628", marginBottom: "5px" }}>{m.title}</div>
                           <p style={{ fontSize: "13px", color: "#6b7280", lineHeight: 1.65, margin: 0 }}>{m.desc}</p>
                         </div>
                       )}
                     </div>
-
-                    {/* Centre — icon floats ON the road */}
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", position: "relative", zIndex: 5 }}>
-                      <div style={{
-                        width: "44px", height: "44px",
-                        background: "#f8f9fb",
-                        borderRadius: "50%",
-                        border: `2.5px solid ${m.color}`,
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        boxShadow: `0 0 0 6px #f8f9fb, 0 4px 16px ${m.color}40`,
-                      }}>
+                      <div style={{ width: "44px", height: "44px", background: "#f8f9fb", borderRadius: "50%", border: `2.5px solid ${m.color}`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: `0 0 0 6px #f8f9fb, 0 4px 16px ${m.color}40` }}>
                         <m.Icon size={19} color={m.color} strokeWidth={1.9} />
                       </div>
                     </div>
-
-                    {/* RIGHT card slot */}
                     <div style={{ paddingLeft: isTablet ? "24px" : "36px", display: "flex", justifyContent: "flex-start" }}>
                       {!cardLeft && (
-                        <div
-                          onMouseEnter={() => setHovered(m.year)}
-                          onMouseLeave={() => setHovered(null)}
-                          style={{ background: "#fff", borderRadius: "18px", padding: "18px 20px", border: hovered === m.year ? `1.5px solid ${m.color}35` : "1.5px solid rgba(10,22,40,0.07)", boxShadow: hovered === m.year ? `0 12px 32px rgba(10,22,40,0.10)` : "0 2px 10px rgba(10,22,40,0.05)", transition: "all .22s ease", maxWidth: "280px", width: "100%", cursor: "default" }}
-                        >
+                        <div onMouseEnter={() => setHovered(m.year)} onMouseLeave={() => setHovered(null)}
+                          style={{ background: "#fff", borderRadius: "18px", padding: "18px 20px", border: hovered === m.year ? `1.5px solid ${m.color}35` : "1.5px solid rgba(10,22,40,0.07)", boxShadow: hovered === m.year ? "0 12px 32px rgba(10,22,40,0.10)" : "0 2px 10px rgba(10,22,40,0.05)", transition: "all .22s ease", maxWidth: "280px", width: "100%", cursor: "default" }}>
                           <div style={{ fontSize: "10px", fontWeight: 700, color: m.color, textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "4px" }}>{m.year} · {m.stat}</div>
                           <div style={{ fontSize: "15px", fontWeight: 700, color: "#0a1628", marginBottom: "5px" }}>{m.title}</div>
                           <p style={{ fontSize: "13px", color: "#6b7280", lineHeight: 1.65, margin: 0 }}>{m.desc}</p>
                         </div>
                       )}
                     </div>
-
                   </div>
                 );
               })}
@@ -613,7 +469,6 @@ export default function AboutPage() {
           </div>
         )}
 
-        {/* Mobile — straight line, icon + card stacked */}
         {isMobile && (
           <div style={{ position: "relative", paddingLeft: "52px" }}>
             <div style={{ position: "absolute", left: "19px", top: 0, bottom: 0, width: "2px", background: "linear-gradient(to bottom,transparent,rgba(10,22,40,0.15) 5%,rgba(10,22,40,0.15) 95%,transparent)" }} />
@@ -649,9 +504,7 @@ export default function AboutPage() {
         </div>
         <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : isTablet ? "repeat(2,1fr)" : "repeat(3,1fr)", gap: "14px" }}>
           {CORE_VALUES.map(v => (
-            <div key={v.title}
-              onMouseEnter={() => setHovered(v.title)}
-              onMouseLeave={() => setHovered(null)}
+            <div key={v.title} onMouseEnter={() => setHovered(v.title)} onMouseLeave={() => setHovered(null)}
               style={{ background: hovered === v.title ? "#fff" : "#f8f9fb", borderRadius: "20px", padding: "26px 22px", border: hovered === v.title ? `1.5px solid ${v.color}25` : "1.5px solid rgba(10,22,40,0.05)", transition: "all .22s ease", transform: hovered === v.title ? "translateY(-5px)" : "translateY(0)", boxShadow: hovered === v.title ? "0 16px 40px rgba(10,22,40,0.09)" : "0 2px 8px rgba(10,22,40,0.03)" }}>
               <div style={{ width: "44px", height: "44px", borderRadius: "13px", background: v.bg, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "14px" }}>
                 <v.Icon size={20} color={v.color} strokeWidth={1.8} />
@@ -664,12 +517,11 @@ export default function AboutPage() {
       </section>
 
       {/* ════════════════════════════════════════════════
-          SECTION 5 — COMMITMENT (dark)
+          SECTION 5 — COMMITMENT
       ════════════════════════════════════════════════ */}
       <section style={{ background: "#0a1628", padding: isMobile ? "56px 16px" : isTablet ? "64px 40px" : "80px 96px", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: "-100px", right: "-100px", width: "500px", height: "500px", background: "radial-gradient(circle,rgba(91,58,142,0.15) 0%,transparent 65%)", borderRadius: "50%", pointerEvents: "none" }} />
         <div style={{ position: "relative", zIndex: 1, display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: isMobile ? "40px" : "80px", alignItems: "start" }}>
-
           <div style={{ position: isMobile ? "static" : "sticky", top: "100px" }}>
             <div style={{ display: "inline-flex", alignItems: "center", gap: "7px", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: "100px", padding: "5px 14px", marginBottom: "20px" }}>
               <div style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#ff8c00" }} />
@@ -691,12 +543,9 @@ export default function AboutPage() {
               </div>
             </div>
           </div>
-
           <div style={{ display: "flex", flexDirection: "column", gap: "9px" }}>
             {COMMITMENTS.map((item, i) => (
-              <div key={i}
-                onMouseEnter={() => setHovered(`c-${i}`)}
-                onMouseLeave={() => setHovered(null)}
+              <div key={i} onMouseEnter={() => setHovered(`c-${i}`)} onMouseLeave={() => setHovered(null)}
                 style={{ background: hovered === `c-${i}` ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.04)", border: hovered === `c-${i}` ? "1px solid rgba(255,255,255,0.18)" : "1px solid rgba(255,255,255,0.07)", borderRadius: "13px", padding: "14px 16px", display: "flex", alignItems: "flex-start", gap: "12px", transition: "all .2s ease", cursor: "default" }}>
                 <div style={{ width: "20px", height: "20px", borderRadius: "6px", background: hovered === `c-${i}` ? "rgba(255,140,0,0.2)" : "rgba(255,255,255,0.07)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "background .2s", marginTop: "1px" }}>
                   <Check size={10} color={hovered === `c-${i}` ? "#ff8c00" : "rgba(255,255,255,0.45)"} strokeWidth={3} />
@@ -712,117 +561,47 @@ export default function AboutPage() {
           SECTION 6 — TEAM
       ════════════════════════════════════════════════ */}
       <section style={{ background: "#ffffff", padding: isMobile ? "64px 16px" : isTablet ? "80px 40px" : "96px 96px", position: "relative", overflow: "hidden" }}>
-
-        {/* ── Large faint "T" watermark — mirrors reference ── */}
         <div style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-55%)", fontSize: "clamp(280px,30vw,480px)", fontWeight: 900, color: "rgba(10,22,40,0.025)", lineHeight: 1, pointerEvents: "none", userSelect: "none", letterSpacing: "-20px", zIndex: 0 }}>U</div>
-
-        {/* ── Wavy SVG line behind cards — mirrors reference ── */}
         <svg style={{ position: "absolute", top: "50%", left: 0, right: 0, width: "100%", transform: "translateY(-50%)", pointerEvents: "none", zIndex: 0 }} height="120" viewBox="0 0 1200 120" preserveAspectRatio="none">
           <path d="M0,60 C150,20 250,100 400,60 C550,20 650,100 800,60 C950,20 1050,100 1200,60" fill="none" stroke="rgba(3,105,161,0.12)" strokeWidth="2.5" strokeLinecap="round" />
         </svg>
-
-        {/* ── Floating colour dots — like the reference ── */}
         {!isMobile && [
-          { top: "22%", left: "18%",  size: 10, color: "#ff8c00",  opacity: 0.55 },
-          { top: "28%", left: "72%",  size: 8,  color: "#0369a1",  opacity: 0.55 },
-          { top: "70%", left: "38%",  size: 13, color: "#0a6e3f",  opacity: 0.5  },
-          { top: "65%", left: "62%",  size: 7,  color: "#ff8c00",  opacity: 0.4  },
-          { top: "20%", left: "52%",  size: 6,  color: "#5b3a8e",  opacity: 0.45 },
+          { top: "22%", left: "18%", size: 10, color: "#ff8c00", opacity: 0.55 },
+          { top: "28%", left: "72%", size: 8,  color: "#0369a1", opacity: 0.55 },
+          { top: "70%", left: "38%", size: 13, color: "#0a6e3f", opacity: 0.5  },
+          { top: "65%", left: "62%", size: 7,  color: "#ff8c00", opacity: 0.4  },
+          { top: "20%", left: "52%", size: 6,  color: "#5b3a8e", opacity: 0.45 },
         ].map((dot, i) => (
           <div key={i} style={{ position: "absolute", top: dot.top, left: dot.left, width: `${dot.size}px`, height: `${dot.size}px`, borderRadius: "50%", background: dot.color, opacity: dot.opacity, pointerEvents: "none", zIndex: 0 }} />
         ))}
 
-        {/* ── Header ── */}
         <div style={{ textAlign: "center", marginBottom: isMobile ? "48px" : "64px", position: "relative", zIndex: 2 }}>
-          <p style={{ fontSize: "13px", fontWeight: 500, color: "#6b7280", margin: "0 0 10px", letterSpacing: "0.2px" }}>
-            Meet the People Behind the Operation
-          </p>
-          <h2 style={{ fontSize: isMobile ? "28px" : "clamp(30px,4vw,50px)", fontWeight: 800, color: "#0a1628", margin: "0 0 14px", letterSpacing: "-2px", lineHeight: 1.05 }}>
-            Our Leadership Team
-          </h2>
-          {/* Orange underline accent — like the reference */}
+          <p style={{ fontSize: "13px", fontWeight: 500, color: "#6b7280", margin: "0 0 10px", letterSpacing: "0.2px" }}>Meet the People Behind the Operation</p>
+          <h2 style={{ fontSize: isMobile ? "28px" : "clamp(30px,4vw,50px)", fontWeight: 800, color: "#0a1628", margin: "0 0 14px", letterSpacing: "-2px", lineHeight: 1.05 }}>Our Leadership Team</h2>
           <div style={{ display: "flex", justifyContent: "center" }}>
             <div style={{ width: "64px", height: "4px", background: "linear-gradient(90deg,#ff8c00,#ffb347)", borderRadius: "100px" }} />
           </div>
         </div>
 
-        {/* ── Team cards grid ── */}
-        <div style={{
-          position: "relative", zIndex: 2,
-          display: "grid",
-          gridTemplateColumns: isMobile ? "1fr 1fr" : isTablet ? "repeat(3,1fr)" : "repeat(4,1fr)",
-          gap: isMobile ? "16px" : "20px",
-          maxWidth: "1040px",
-          margin: "0 auto",
-        }}>
+        <div style={{ position: "relative", zIndex: 2, display: "grid", gridTemplateColumns: isMobile ? "1fr 1fr" : isTablet ? "repeat(3,1fr)" : "repeat(4,1fr)", gap: isMobile ? "16px" : "20px", maxWidth: "1040px", margin: "0 auto" }}>
           {[
-            { name: "James Mwangi",    role: "Chief Executive Officer",       initials: "JM", color: "#0a1628", bg: "linear-gradient(135deg,#0a1628,#1a2a5e)" },
-            { name: "Amina Hassan",    role: "Chief Operating Officer",       initials: "AH", color: "#0369a1", bg: "linear-gradient(135deg,#0369a1,#0ea5e9)" },
-            { name: "Peter Ochieng",   role: "Head of Customs Clearance",     initials: "PO", color: "#5b3a8e", bg: "linear-gradient(135deg,#5b3a8e,#7c3aed)" },
-            { name: "Sarah Kimani",    role: "Head of Sea Freight",           initials: "SK", color: "#0a6e3f", bg: "linear-gradient(135deg,#0a6e3f,#16a34a)" },
-            { name: "David Mutua",     role: "Head of Air Freight",           initials: "DM", color: "#b45309", bg: "linear-gradient(135deg,#b45309,#f59e0b)" },
-            { name: "Grace Wanjiku",   role: "Head of Warehousing",          initials: "GW", color: "#be123c", bg: "linear-gradient(135deg,#be123c,#f43f5e)" },
-            { name: "Brian Otieno",    role: "Head of Cross Border Ops",      initials: "BO", color: "#0f766e", bg: "linear-gradient(135deg,#0f766e,#14b8a6)" },
-            { name: "Fatuma Ali",      role: "Finance & Compliance Director", initials: "FA", color: "#7c3aed", bg: "linear-gradient(135deg,#7c3aed,#a78bfa)" },
+            { name: "James Mwangi",  role: "Chief Executive Officer",       initials: "JM", color: "#0a1628", bg: "linear-gradient(135deg,#0a1628,#1a2a5e)" },
+            { name: "Amina Hassan",  role: "Chief Operating Officer",       initials: "AH", color: "#0369a1", bg: "linear-gradient(135deg,#0369a1,#0ea5e9)" },
+            { name: "Peter Ochieng", role: "Head of Customs Clearance",     initials: "PO", color: "#5b3a8e", bg: "linear-gradient(135deg,#5b3a8e,#7c3aed)" },
+            { name: "Sarah Kimani",  role: "Head of Sea Freight",           initials: "SK", color: "#0a6e3f", bg: "linear-gradient(135deg,#0a6e3f,#16a34a)" },
+            { name: "David Mutua",   role: "Head of Air Freight",           initials: "DM", color: "#b45309", bg: "linear-gradient(135deg,#b45309,#f59e0b)" },
+            { name: "Grace Wanjiku", role: "Head of Warehousing",           initials: "GW", color: "#be123c", bg: "linear-gradient(135deg,#be123c,#f43f5e)" },
+            { name: "Brian Otieno",  role: "Head of Cross Border Ops",      initials: "BO", color: "#0f766e", bg: "linear-gradient(135deg,#0f766e,#14b8a6)" },
+            { name: "Fatuma Ali",    role: "Finance & Compliance Director",  initials: "FA", color: "#7c3aed", bg: "linear-gradient(135deg,#7c3aed,#a78bfa)" },
           ].map((member, i) => (
-            <div
-              key={member.name}
-              onMouseEnter={() => setHovered(`tm-${i}`)}
-              onMouseLeave={() => setHovered(null)}
-              style={{
-                background: "#ffffff",
-                borderRadius: "20px",
-                padding: isMobile ? "20px 14px 18px" : "28px 20px 22px",
-                border: hovered === `tm-${i}` ? `1.5px solid ${member.color}25` : "1.5px solid rgba(10,22,40,0.07)",
-                boxShadow: hovered === `tm-${i}` ? `0 20px 48px rgba(10,22,40,0.12), 0 4px 12px ${member.color}20` : "0 4px 20px rgba(10,22,40,0.06)",
-                transition: "all .28s cubic-bezier(.22,1,.36,1)",
-                transform: hovered === `tm-${i}` ? "translateY(-8px)" : "translateY(0)",
-                cursor: "default",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                textAlign: "center",
-                position: "relative",
-                overflow: "hidden",
-              }}
-            >
-              {/* Subtle top-right orb */}
+            <div key={member.name} onMouseEnter={() => setHovered(`tm-${i}`)} onMouseLeave={() => setHovered(null)}
+              style={{ background: "#ffffff", borderRadius: "20px", padding: isMobile ? "20px 14px 18px" : "28px 20px 22px", border: hovered === `tm-${i}` ? `1.5px solid ${member.color}25` : "1.5px solid rgba(10,22,40,0.07)", boxShadow: hovered === `tm-${i}` ? `0 20px 48px rgba(10,22,40,0.12), 0 4px 12px ${member.color}20` : "0 4px 20px rgba(10,22,40,0.06)", transition: "all .28s cubic-bezier(.22,1,.36,1)", transform: hovered === `tm-${i}` ? "translateY(-8px)" : "translateY(0)", cursor: "default", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", position: "relative", overflow: "hidden" }}>
               <div style={{ position: "absolute", top: "-20px", right: "-20px", width: "80px", height: "80px", background: `radial-gradient(circle,${member.color}18 0%,transparent 70%)`, borderRadius: "50%", pointerEvents: "none" }} />
-
-              {/* Avatar — breaks out of card top like the reference */}
-              <div style={{
-                width: isMobile ? "64px" : "80px",
-                height: isMobile ? "64px" : "80px",
-                borderRadius: "50%",
-                background: member.bg,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: isMobile ? "18px" : "22px",
-                fontWeight: 800,
-                color: "#ffffff",
-                letterSpacing: "-0.5px",
-                marginBottom: isMobile ? "12px" : "16px",
-                border: "3px solid #ffffff",
-                boxShadow: `0 8px 24px ${member.color}40`,
-                flexShrink: 0,
-                position: "relative",
-                zIndex: 1,
-              }}>
+              <div style={{ width: isMobile ? "64px" : "80px", height: isMobile ? "64px" : "80px", borderRadius: "50%", background: member.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: isMobile ? "18px" : "22px", fontWeight: 800, color: "#ffffff", letterSpacing: "-0.5px", marginBottom: isMobile ? "12px" : "16px", border: "3px solid #ffffff", boxShadow: `0 8px 24px ${member.color}40`, flexShrink: 0, position: "relative", zIndex: 1 }}>
                 {member.initials}
               </div>
-
-              {/* Name */}
-              <div style={{ fontSize: isMobile ? "13px" : "14px", fontWeight: 700, color: "#0a1628", marginBottom: "4px", lineHeight: 1.2, position: "relative", zIndex: 1 }}>
-                {member.name}
-              </div>
-
-              {/* Role */}
-              <div style={{ fontSize: isMobile ? "10px" : "12px", color: member.color, fontWeight: 600, lineHeight: 1.4, position: "relative", zIndex: 1 }}>
-                {member.role}
-              </div>
-
-              {/* Bottom accent line */}
+              <div style={{ fontSize: isMobile ? "13px" : "14px", fontWeight: 700, color: "#0a1628", marginBottom: "4px", lineHeight: 1.2, position: "relative", zIndex: 1 }}>{member.name}</div>
+              <div style={{ fontSize: isMobile ? "10px" : "12px", color: member.color, fontWeight: 600, lineHeight: 1.4, position: "relative", zIndex: 1 }}>{member.role}</div>
               <div style={{ position: "absolute", bottom: 0, left: "50%", transform: "translateX(-50%)", width: hovered === `tm-${i}` ? "60%" : "0%", height: "3px", background: `linear-gradient(90deg,transparent,${member.color},transparent)`, borderRadius: "100px", transition: "width .35s cubic-bezier(.22,1,.36,1)" }} />
             </div>
           ))}

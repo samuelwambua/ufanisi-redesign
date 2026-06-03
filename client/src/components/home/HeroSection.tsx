@@ -1,5 +1,4 @@
 import { useRef, useState, useEffect, useCallback } from "react";
-import logo from "../../assets/ufanisi-logo.png";
 import imgSeaFreight from "../../assets/sea-freight.jfif";
 import imgAirFreight from "../../assets/air-freight.jfif";
 import imgCustoms from "../../assets/customs-clearance.jfif";
@@ -12,14 +11,6 @@ import certISO9001 from "../../assets/iso-9001.png";
 import certISO22000 from "../../assets/iso-22000.png";
 import certTOP100 from "../../assets/top-100.png";
 import certWCA from "../../assets/wca.png";
-
-const NAV_LINKS = [
-  { label: "About", href: "/about" },
-  { label: "Services", href: "/services" },
-  { label: "SDGs", href: "/sdgs" },
-  { label: "Blogs", href: "/blogs" },
-  { label: "Contact", href: "/contact" },
-];
 
 const SERVICE_CARDS = [
   { title: "Sea Freight",       subtitle: "Global ocean shipping",  image: imgSeaFreight,   rotate: -5 },
@@ -54,8 +45,6 @@ function getBreakpoint(w: number): "mobile" | "tablet" | "desktop" {
   return "desktop";
 }
 
-// ─── Key fix: use visualViewport.width which does NOT change when the
-//     mobile browser toolbar shows/hides. Falls back to innerWidth.
 function getStableWidth(): number {
   if (typeof window === "undefined") return 1440;
   return Math.floor(window.visualViewport?.width ?? window.innerWidth);
@@ -68,10 +57,8 @@ function getArcY(screenX: number, vpWidth: number): number {
 }
 
 export default function HeroSection() {
-  const [scrollX, setScrollX]       = useState(0);
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [scrollX, setScrollX] = useState(0);
 
-  // ── Initialize from the real viewport width immediately (not hardcoded 1440)
   const [vpWidth, setVpWidth] = useState<number>(() => getStableWidth());
   const [bp, setBp]           = useState<"mobile" | "tablet" | "desktop">(() =>
     getBreakpoint(getStableWidth())
@@ -87,13 +74,10 @@ export default function HeroSection() {
   const velRef          = useRef(0);
   const lastX           = useRef(0);
   const lastT           = useRef(0);
-  // Track last WIDTH so we only update breakpoint on true width changes
   const lastWidth       = useRef<number>(getStableWidth());
 
   useEffect(() => {
     const update = () => {
-      // getStableWidth() uses visualViewport — immune to toolbar show/hide.
-      // Math.floor prevents sub-pixel jitter on some Android browsers.
       const w = getStableWidth();
       if (w !== lastWidth.current) {
         lastWidth.current = w;
@@ -102,7 +86,6 @@ export default function HeroSection() {
       }
     };
 
-    // Sync initial values (in case SSR or stale initial state)
     const w = getStableWidth();
     if (w !== lastWidth.current) {
       lastWidth.current = w;
@@ -110,18 +93,10 @@ export default function HeroSection() {
       setBp(getBreakpoint(w));
     }
 
-    // ── Critical: listen on visualViewport, not window ──
-    // visualViewport.resize fires on zoom/orientation changes but NOT when
-    // the mobile browser address bar appears/disappears. This is exactly
-    // what we want — layout stays stable during scroll.
     const target: EventTarget = window.visualViewport ?? window;
     target.addEventListener("resize", update);
     return () => target.removeEventListener("resize", update);
   }, []);
-
-  useEffect(() => {
-    if (!isMobile && !isTablet) setDrawerOpen(false);
-  }, [isMobile, isTablet]);
 
   const clamp = useCallback((x: number) => {
     const range = TOTAL * CARD_STEP;
@@ -171,15 +146,12 @@ export default function HeroSection() {
     animRef.current = requestAnimationFrame(animate);
   };
 
-  const sets        = [-1, 0, 1];
-  const stringPath  = `M 0,${STRING_Y} Q ${vpWidth / 2},${STRING_Y + ARC_DEPTH} ${vpWidth},${STRING_Y}`;
+  const sets       = [-1, 0, 1];
+  const stringPath = `M 0,${STRING_Y} Q ${vpWidth / 2},${STRING_Y + ARC_DEPTH} ${vpWidth},${STRING_Y}`;
 
-  // ── Responsive values — derived from stable bp state ──────────────────────
-  const navPadding  = isMobile ? "0 16px"       : isTablet ? "0 40px"       : "0 96px";
   const heroPadding = isMobile ? "40px 16px 0"  : isTablet ? "56px 40px 0"  : "64px 96px 0";
   const certPadding = isMobile ? "32px 16px"    : isTablet ? "36px 40px"    : "40px 96px";
 
-  // Card dimensions — fixed per breakpoint, only update on real width change
   const cardW    = isMobile ? 200 : CARD_WIDTH;
   const cardStep = isMobile ? 220 : CARD_STEP;
   const imgH     = isMobile ? 130 : 170;
@@ -187,7 +159,6 @@ export default function HeroSection() {
   return (
     <div style={{ background: "#ffffff", fontFamily: "'DM Sans','Inter',sans-serif", overflowX: "hidden" }}>
 
-      {/* ── Gallery height locked in CSS — immune to mobile toolbar resize ── */}
       <style>{`
         .uf-gallery {
           height: 400px;
@@ -199,7 +170,6 @@ export default function HeroSection() {
           .uf-gallery { height: 320px; }
         }
 
-        /* ── Hero text — locked font sizes via CSS, not JS ── */
         .uf-hero-h1 {
           font-size: clamp(60px, 7.5vw, 96px);
           letter-spacing: -3px;
@@ -226,70 +196,6 @@ export default function HeroSection() {
       {/* Ambient bg */}
       <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 0, background: "radial-gradient(ellipse at 90% 0%,rgba(255,140,0,0.03) 0%,transparent 50%),radial-gradient(ellipse at 10% 100%,rgba(10,22,40,0.03) 0%,transparent 50%)" }} />
 
-      {/* Mobile drawer overlay */}
-      {drawerOpen && (
-        <div onClick={() => setDrawerOpen(false)} style={{ position: "fixed", inset: 0, background: "rgba(10,22,40,0.4)", zIndex: 200, backdropFilter: "blur(4px)" }} />
-      )}
-
-      {/* Side drawer */}
-      <div style={{ position: "fixed", top: 0, right: 0, bottom: 0, width: "280px", background: "#ffffff", zIndex: 300, transform: drawerOpen ? "translateX(0)" : "translateX(100%)", transition: "transform 0.35s cubic-bezier(0.4,0,0.2,1)", boxShadow: drawerOpen ? "-8px 0 32px rgba(10,22,40,0.15)" : "none", display: "flex", flexDirection: "column", padding: "24px" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "40px" }}>
-          <img src={logo} alt="Ufanisi Freighters" style={{ height: "48px", width: "48px", objectFit: "contain" }} />
-          <button onClick={() => setDrawerOpen(false)} style={{ background: "rgba(10,22,40,0.06)", border: "none", borderRadius: "10px", width: "36px", height: "36px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0a1628" strokeWidth="2.2" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
-          </button>
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 1 }}>
-          {NAV_LINKS.map(link => (
-            <a key={link.label} href={link.href} onClick={() => setDrawerOpen(false)}
-              style={{ color: "#0a1628", fontSize: "16px", fontWeight: 600, textDecoration: "none", padding: "14px 16px", borderRadius: "12px", transition: "background .2s" }}
-              onMouseEnter={e => (e.currentTarget.style.background = "rgba(10,22,40,0.05)")}
-              onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
-            >{link.label}</a>
-          ))}
-          <a href="/tracking" onClick={() => setDrawerOpen(false)} style={{ color: "#0a1628", fontSize: "16px", fontWeight: 600, textDecoration: "none", padding: "14px 16px", borderRadius: "12px", display: "flex", alignItems: "center", gap: "8px" }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ff8c00" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg>
-            Track Cargo
-          </a>
-        </div>
-        <button style={{ background: "#0a1628", color: "#fff", border: "none", padding: "14px", borderRadius: "100px", fontSize: "15px", fontWeight: 600, cursor: "pointer", fontFamily: "inherit", width: "100%" }}>
-          Get a Quote
-        </button>
-      </div>
-
-      {/* ── NAVBAR ── */}
-      <nav style={{ position: "sticky", top: 0, zIndex: 100, display: "flex", alignItems: "center", justifyContent: "space-between", padding: navPadding, height: "70px", background: "rgba(255,255,255,0.9)", backdropFilter: "blur(20px)", borderBottom: "1px solid rgba(10,22,40,0.07)" }}>
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <img src={logo} alt="Ufanisi Freighters" style={{ height: "60px", width: "60px", objectFit: "contain" }} />
-        </div>
-        {!isMobile && !isTablet && (
-          <div style={{ display: "flex", gap: "34px" }}>
-            {NAV_LINKS.map(link => (
-              <a key={link.label} href={link.href} style={{ color: "#4a5568", fontSize: "14px", fontWeight: 500, textDecoration: "none" }}
-                onMouseEnter={e => (e.currentTarget.style.color = "#0a1628")}
-                onMouseLeave={e => (e.currentTarget.style.color = "#4a5568")}
-              >{link.label}</a>
-            ))}
-          </div>
-        )}
-        {!isMobile && !isTablet && (
-          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-            <a href="/tracking" style={{ color: "#0a1628", fontSize: "14px", fontWeight: 500, textDecoration: "none", display: "flex", alignItems: "center", gap: "5px" }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ff8c00" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /></svg>
-              Track Cargo
-            </a>
-            <button style={{ background: "#0a1628", color: "#fff", border: "none", padding: "10px 24px", borderRadius: "100px", fontSize: "14px", fontWeight: 600, cursor: "pointer", fontFamily: "inherit", boxShadow: "0 4px 14px rgba(10,22,40,0.22)" }}>Get a Quote</button>
-          </div>
-        )}
-        {(isMobile || isTablet) && (
-          <button onClick={() => setDrawerOpen(true)} style={{ background: "rgba(10,22,40,0.06)", border: "none", borderRadius: "10px", width: "40px", height: "40px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", gap: "5px", padding: "10px" }}>
-            <span style={{ display: "block", width: "18px", height: "2px", background: "#0a1628", borderRadius: "2px" }} />
-            <span style={{ display: "block", width: "18px", height: "2px", background: "#0a1628", borderRadius: "2px" }} />
-            <span style={{ display: "block", width: "18px", height: "2px", background: "#0a1628", borderRadius: "2px" }} />
-          </button>
-        )}
-      </nav>
-
       {/* ── HERO CONTENT ── */}
       <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", padding: heroPadding }}>
 
@@ -301,12 +207,6 @@ export default function HeroSection() {
           <span style={{ color: "#4a5568", fontSize: isMobile ? "11px" : "13px", fontWeight: 500 }}>East Africa's trusted freight partner</span>
         </div>
 
-        {/*
-          ── H1: font-size is set via .uf-hero-h1 CSS class (pure media queries).
-          This means the browser never re-evaluates it on toolbar show/hide —
-          only on true viewport width changes. The inline style is removed
-          to prevent JS-driven re-renders from overriding the CSS.
-        ──*/}
         <h1
           className="uf-hero-h1"
           style={{
@@ -323,7 +223,7 @@ export default function HeroSection() {
 
         {/* Subtitle */}
         <p style={{ fontSize: "16px", color: "#6b7280", maxWidth: "480px", lineHeight: 1.6, margin: "0 0 32px", fontWeight: 400, padding: isMobile ? "0 8px" : "0" }}>
-           Moving your cargo across the globe with speed and precision.
+          Moving your cargo across the globe with speed and precision.
         </p>
 
         {/* CTA */}
@@ -344,10 +244,6 @@ export default function HeroSection() {
         onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp} onMouseLeave={onMouseUp}
         onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}
       >
-        {/*
-          Gallery container height is set via .uf-gallery CSS class (pure CSS
-          media queries) — completely immune to mobile browser toolbar resize events.
-        */}
         <div className="uf-gallery" style={{ position: "relative", cursor: isDragging.current ? "grabbing" : "grab" }}>
           <svg style={{ position: "absolute", top: 0, left: 0, width: "100%", pointerEvents: "none", zIndex: 2 }}
             height={STRING_Y + ARC_DEPTH + 10}
@@ -371,7 +267,6 @@ export default function HeroSection() {
 
               return (
                 <div key={`${set}-${i}`} style={{ position: "absolute", left: screenX - cardW / 2, top: 0, width: `${cardW}px`, zIndex: 5, transform: `rotate(${card.rotate}deg)`, transformOrigin: `${cardW / 2}px ${pinHeadCY}px`, pointerEvents: "none" }}>
-                  {/* Pin head */}
                   <div style={{ position: "absolute", left: "50%", top: pinHeadCY - PIN_HEAD_R, transform: "translateX(-50%)", display: "flex", flexDirection: "column", alignItems: "center", zIndex: 10 }}>
                     <div style={{ width: `${PIN_HEAD_R * 2}px`, height: `${PIN_HEAD_R * 2}px`, borderRadius: "50%", background: "radial-gradient(circle at 35% 35%, #ffb347, #e65c00)", boxShadow: "0 2px 8px rgba(230,92,0,0.55), inset 0 1px 2px rgba(255,255,255,0.45)", position: "relative" }}>
                       <div style={{ position: "absolute", top: "3px", left: "3px", width: "4px", height: "4px", borderRadius: "50%", background: "rgba(255,255,255,0.6)" }} />
@@ -379,7 +274,6 @@ export default function HeroSection() {
                     <div style={{ width: "2px", height: `${PIN_NEEDLE_H}px`, background: "linear-gradient(to bottom, #b34400, #7a2d00)", borderRadius: "0 0 2px 2px", marginTop: "-1px" }} />
                   </div>
 
-                  {/* Card */}
                   <div style={{ position: "absolute", top: cardTop, left: 0, width: `${cardW}px`, background: "#fff", borderRadius: "18px", overflow: "hidden", border: `1px solid ${card.featured ? "rgba(255,140,0,0.28)" : "rgba(10,22,40,0.08)"}`, boxShadow: card.featured ? "0 12px 36px rgba(255,140,0,0.14),0 4px 12px rgba(10,22,40,0.08)" : "0 8px 28px rgba(10,22,40,0.1),0 2px 6px rgba(10,22,40,0.05)" }}>
                     <div style={{ height: `${imgH}px`, overflow: "hidden", position: "relative" }}>
                       <img src={card.image} alt={card.title} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
@@ -398,7 +292,6 @@ export default function HeroSection() {
           )}
         </div>
 
-        {/* Edge fade masks */}
         <div style={{ position: "absolute", top: 0, bottom: 0, left: 0, width: "60px", background: "linear-gradient(to right,#fff 50%,transparent)", zIndex: 20, pointerEvents: "none" }} />
         <div style={{ position: "absolute", top: 0, bottom: 0, right: 0, width: "60px", background: "linear-gradient(to left,#fff 50%,transparent)", zIndex: 20, pointerEvents: "none" }} />
       </div>
