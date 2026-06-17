@@ -270,8 +270,8 @@ export default function ServicesHero() {
           letterSpacing: isMobile ? "-1.5px" : "-3px",
           margin: 0,
         }}>
-          <span style={{ color: "#0a1628", display: "block" }}>We Move</span>
-          <span style={{ color: "#5b3a8e", display: "block" }}>What Matters.</span>
+          <span style={{ color: "#0a1628", display: "block" }}>We Move What</span>
+          <span style={{ color: "#5b3a8e", display: "block" }}>Matters.</span>
         </h1>
 
         <p style={{

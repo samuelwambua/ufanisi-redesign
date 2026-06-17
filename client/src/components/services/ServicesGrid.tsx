@@ -7,7 +7,7 @@ const SERVICES = [
     subtitle: "Ocean Shipping",
     description:
       "Full authority in customs clearance and delivery of sea cargo worldwide. FCL & LCL, import & export via major global ports.",
-    href: "/service?r=sea-freight-management",
+    href: "/sea-freight",
     bg: "#D6CFC4",
     shapeColor: "#A89880",
     accentColor: "#6B5B45",
@@ -26,7 +26,7 @@ const SERVICES = [
     subtitle: "Global Express",
     description:
       "Fast import & export air cargo worldwide. We coordinate with a vast network of airline partners for time-critical shipments.",
-    href: "/service?r=air-freight-management",
+    href: "/air-freight",
     bg: "#C8D4D8",
     shapeColor: "#8AAAB4",
     accentColor: "#3D606B",
@@ -45,7 +45,7 @@ const SERVICES = [
     subtitle: "Sea & Air · AEO",
     description:
       "Swift import & export clearance at all major Kenyan ports and airports. Authorized Economic Operator — priority processing.",
-    href: "/service?r=sea-and-air-customs-clearance",
+    href: "/customs-clearance",
     bg: "#D4CED8",
     shapeColor: "#A094AE",
     accentColor: "#5C5070",
@@ -64,7 +64,7 @@ const SERVICES = [
     subtitle: "Free & Bonded",
     description:
       "ISO-certified, secure storage near major ports. Full cargo handling, collateral management, and bonded warehouse facilities.",
-    href: "/service?r=free-and-customs-bonded-warehousing",
+    href: "/warehousing",
     bg: "#C9D6C8",
     shapeColor: "#7FA37C",
     accentColor: "#3D6B3A",
@@ -83,7 +83,7 @@ const SERVICES = [
     subtitle: "East Africa Corridors",
     description:
       "Experienced teams at all major entry and exit points across East Africa — Malaba, Namanga, Holili and beyond.",
-    href: "/service?r=cross-border-clearance",
+    href: "/cross-border",
     bg: "#D4C9BC",
     shapeColor: "#B5906A",
     accentColor: "#7A5535",
@@ -103,7 +103,7 @@ const SERVICES = [
     subtitle: "Door-to-Door",
     description:
       "Own fleet of flatbeds, skeletal, low loaders & canters. GPS-monitored delivery across the full East African road network.",
-    href: "/service?r=transport-tracking",
+    href: "/trucking",
     bg: "#C9C8BC",
     shapeColor: "#919077",
     accentColor: "#555447",
@@ -123,7 +123,7 @@ const SERVICES = [
     subtitle: "Heavy & Oversized",
     description:
       "Specialised handling for heavy lifts, oversized machinery and out-of-gauge cargo. End-to-end project logistics management.",
-    href: "/service?r=project-cargo",
+    href: "/project-cargo",
     bg: "#BFCDD4",
     shapeColor: "#6C93A6",
     accentColor: "#2C5568",
@@ -143,7 +143,7 @@ const SERVICES = [
     subtitle: "Asset Control",
     description:
       "Professional collateral management for commodity-backed financing. Secure monitoring, stock reporting and release protocols.",
-    href: "/service?r=collateral-management",
+    href: "/collateral-management",
     bg: "#D8C9C6",
     shapeColor: "#B5857A",
     accentColor: "#7A4A40",
